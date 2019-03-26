@@ -1,3 +1,5 @@
+//Caution: Direct download of this application will not work without the associated image files.
+
 package bingo1;
 
 import java.awt.Color;
@@ -28,7 +30,7 @@ public class Bingo extends JFrame
     public static Boolean timeFlag = false, inkFlag = false, gamePaused = false, gameActive = false;
     private int activeNumber = 0, numberGot = 0;
     
-    private JLabel version = new JLabel("Java Bingo - Beta 1.3");
+    private JLabel version = new JLabel("Java Bingo - Beta 1.3"); //Displayed at the top left corner of the screen
     
     private JLabel cardLabel, boardLabel, winLabel, ballLabel, ballNumber, nextBall, displayCount;
     private ImageIcon card, winAnim, bBall, iBall, nBall, gBall, oBall, startBall, numberBoard;
@@ -36,7 +38,7 @@ public class Bingo extends JFrame
     
     private ArrayList<Integer> calledNumbers = new ArrayList<Integer>(), cardNumbers = new ArrayList<Integer>();
     
-    private Timer nelly, nallu, nolla;
+    private Timer mainTimer;
     
     private Random pick = new Random();
     
@@ -45,17 +47,21 @@ public class Bingo extends JFrame
         super("Java Bingo");
         JPanel p = new JPanel();
         
-        p.setLayout(null);
+        p.setLayout(null); //Allows for manual placement of each element
         getContentPane().add(p);
 
+        //The ball graphics appear at the left side of the screen, when a ball is drawn
         bBall = new ImageIcon(getClass().getResource("B ball.PNG"));
         iBall = new ImageIcon(getClass().getResource("I ball.PNG"));
         nBall = new ImageIcon(getClass().getResource("N ball.PNG"));
         gBall = new ImageIcon(getClass().getResource("G ball.PNG"));
         oBall = new ImageIcon(getClass().getResource("O ball.PNG"));  
         
+        //Before the game begins, the ball is silver (no number)
         startBall = new ImageIcon(getClass().getResource("Start ball.PNG"));  
         
+        //The player can 'mark' the bingo card with seven different colors of ink.
+        //Each square on the card has two JLabels, one for the ink, and one for the number.
         inkR = new ImageIcon(getClass().getResource("InkRed.PNG"));
         inkO = new ImageIcon(getClass().getResource("InkOrange.PNG"));
         inkY = new ImageIcon(getClass().getResource("InkYellow.PNG"));
@@ -128,18 +134,19 @@ public class Bingo extends JFrame
         p.add(pause);
         pause.setEnabled(false);
         
-        HandlerClass handoraa = new HandlerClass();
-        newGame.addActionListener(handoraa);
-        inkColorB.addActionListener(handoraa);
-        timeSet.addActionListener(handoraa);
-        pause.addActionListener(handoraa);
+        HandlerClass handler = new HandlerClass();
+        newGame.addActionListener(handler);
+        inkColorB.addActionListener(handler);
+        timeSet.addActionListener(handler);
+        pause.addActionListener(handler);
         
-        mouseHandlerClass handoraa2 = new mouseHandlerClass();
+        mouseHandlerClass handler2 = new mouseHandlerClass();
         
         number = new JLabel[24];
         numberInk = new JLabel[24];
-        numberInked = new Boolean[24];
+        numberInked = new Boolean[24]; //This determines whether the square has been inked
         
+        //Each square on the card has a number label and an ink label. The number must be placed before the ink is (as it is on top)
         for (int i = 0; i < number.length; i++)
         {
             number[i] = new JLabel("");
@@ -151,8 +158,10 @@ public class Bingo extends JFrame
             numberInked[i] = false;
         }
         
+        //This applies to the number board, on the right side of the screen.
         boardNumber = new JLabel[75];
         
+        //The numbers start out dark gray, but become white when their ball has been pulled.
         for (int i = 0; i < boardNumber.length; i++)
         {
             boardNumber[i] = new JLabel("" + (i + 1));
@@ -160,29 +169,32 @@ public class Bingo extends JFrame
             boardNumber[i].setForeground(Color.DARK_GRAY);
             boardNumber[i].setHorizontalAlignment(SwingConstants.CENTER);
 
+            //The purpose of these blocks is just to position the numbers by column according to B/I/N/G/O.
             if (i < 15)
             {
-                boardNumber[i].setBounds(15, (30 * i) + 60, 25, 25);
+                boardNumber[i].setBounds(15, (30 * i) + 60, 25, 25); //B (1-15)
             }
             else if (i < 30)
             {
-                boardNumber[i].setBounds(71, (30 * (i - 15)) + 60, 25, 25);
+                boardNumber[i].setBounds(71, (30 * (i - 15)) + 60, 25, 25); //I (16-30)
             }
             else if (i < 45)
             {
-                boardNumber[i].setBounds(135, (30 * (i - 30)) + 60, 25, 25);
+                boardNumber[i].setBounds(135, (30 * (i - 30)) + 60, 25, 25); //N (31-45)
             }
             else if (i < 60)
             {
-                boardNumber[i].setBounds(203, (30 * (i - 45)) + 60, 25, 25);
+                boardNumber[i].setBounds(203, (30 * (i - 45)) + 60, 25, 25); //G (46-60)
             }
             else //i >= 60
             {
-                boardNumber[i].setBounds(269, (30 * (i - 60)) + 60, 25, 25);
+                boardNumber[i].setBounds(269, (30 * (i - 60)) + 60, 25, 25); //O (61-75)
             }
             
             boardLabel.add(boardNumber[i]);
         }
+        
+        //Setting the position of the labels on the card. The labels of the same index go in the same position.
         
         //This is the B column
         number[0].setBounds(4, 99, 90, 90);
@@ -210,7 +222,7 @@ public class Bingo extends JFrame
         numberInk[8].setBounds(95, 372, 90, 90);
         numberInk[9].setBounds(95, 463, 90, 90);
         
-        //N
+        //N - there are only four here because of the Free space, in the center of the card.
         number[10].setBounds(186, 99, 90, 90);
         number[11].setBounds(186, 190, 90, 90);
         number[12].setBounds(186, 372, 90, 90);
@@ -247,64 +259,65 @@ public class Bingo extends JFrame
         numberInk[22].setBounds(368, 372, 90, 90);
         numberInk[23].setBounds(368, 463, 90, 90);
         
+        //Now the labels are added to the card and become clickable
         for (int i = 0; i < number.length; i++)
         {
             cardLabel.add(number[i]);
             cardLabel.add(numberInk[i]);
-            number[i].addMouseListener(handoraa2);
+            number[i].addMouseListener(handler2);
         }
         
     }
     
     private class HandlerClass implements ActionListener
     {
-        public void actionPerformed(ActionEvent ebento)
+        public void actionPerformed(ActionEvent e)
         {
-            if (ebento.getSource() == newGame)
+            if (e.getSource() == newGame) //Starts a new game, picking the numbers for the card
             {             
                 int[] selection = new int[24];
                 
-                newGame.setEnabled(false);
+                newGame.setEnabled(false); //Buttons disabled while the game is in progress and unpaused
                 inkColorB.setEnabled(false);
                 timeSet.setEnabled(false);
                 pause.setEnabled(true);
                 
-                clearCard();
+                clearCard(); //If a game happened before, discards the previous card
                          
-                getB(selection);
+                getB(selection); //Gets the numbers for the card
                 getI(selection);
                 getN(selection);
                 getG(selection);
                 getO(selection);
                 
-                nelly = new Timer();
-                nelly.schedule(new ballClass(), 0, 1 * 1000);
+                mainTimer = new Timer();
+                mainTimer.schedule(new ballClass(), 0, 1 * 1000); //Runs every 1000 ms (1 second) although this is rather arbitrary
                 
                 gameActive = true;
             }
-            else if (ebento.getSource() == inkColorB)
+            else if (e.getSource() == inkColorB) //Opens the ink window, where the player can choose a new ink color
             {
-                if (inkFlag == false)
+                if (inkFlag == false) //inkFlag determines whether the ink color window is open. If it is, the window does not open a second time.
                 {
                     inkFlag = true;
-                    newGame.setEnabled(false);
+                    newGame.setEnabled(false); //Buttons disabled while the ink color window is open
                     inkColorB.setEnabled(false);
                     timeSet.setEnabled(false);
                     
-                    inkColorWindow lelda = new inkColorWindow();
-                    lelda.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                    lelda.setSize(740, 300);
-                    lelda.setVisible(true);
+                    inkColorWindow ink = new inkColorWindow();
+                    ink.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                    ink.setSize(740, 300);
+                    ink.setVisible(true);
                     
-                    lelda.addWindowListener(new java.awt.event.WindowAdapter() //This allows the user to click the X to close the window
+                    ink.addWindowListener(new java.awt.event.WindowAdapter() //This allows the user to click the X to close the window
                     {
-                        public void windowClosing(java.awt.event.WindowEvent ebento)
+                        public void windowClosing(java.awt.event.WindowEvent e)
                         {
                             inkFlag = false;
                             inkColorB.setEnabled(true);
                             timeSet.setEnabled(true);
                             
-                            if (! gamePaused)
+                            if (! gamePaused) //The only times the ink window can be open is if the game is paused or a game is not currently underway
                             {
                                 newGame.setEnabled(true);
                             }
@@ -312,29 +325,29 @@ public class Bingo extends JFrame
                     });
                 }
             }
-            else if (ebento.getSource() == timeSet)
+            else if (e.getSource() == timeSet) //The time window allows the user to choose between 5 and 15 second delay for a new ball.
             {
-                if (timeFlag == false)
+                if (timeFlag == false) //timeFlag determines whether the time window is open. If it is, the window does not open a second time.
                 {
                     timeFlag = true;
-                    newGame.setEnabled(false);
+                    newGame.setEnabled(false); //Buttons disabled while the time window is open
                     inkColorB.setEnabled(false);
                     timeSet.setEnabled(false);
                     
-                    timeWindow lelda = new timeWindow();
-                    lelda.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                    lelda.setSize(700, 250);
-                    lelda.setVisible(true);
+                    timeWindow tw = new timeWindow();
+                    tw.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                    tw.setSize(700, 250);
+                    tw.setVisible(true);
                     
-                    lelda.addWindowListener(new java.awt.event.WindowAdapter() //This allows the user to click the X to close the window
+                    tw.addWindowListener(new java.awt.event.WindowAdapter() //This allows the user to click the X to close the window
                     {
-                        public void windowClosing(java.awt.event.WindowEvent ebento)
+                        public void windowClosing(java.awt.event.WindowEvent e)
                         {
                             timeFlag = false;
                             inkColorB.setEnabled(true);
                             timeSet.setEnabled(true);
                             
-                            if (! gamePaused)
+                            if (! gamePaused) //The only times the time window can be open is if the game is paused or a game is not currently underway
                             {
                                 newGame.setEnabled(true);
                             }
@@ -342,19 +355,19 @@ public class Bingo extends JFrame
                     });
                 }
             }
-            else if (ebento.getSource() == pause)
+            else if (e.getSource() == pause) //Pauses or unpauses the game, depending on whether the game has been paused.
             {
-                if (! gamePaused)
+                if (! gamePaused) //Not paused, so pauses
                 {
                     gamePaused = true;
-                    inkColorB.setEnabled(true);
+                    inkColorB.setEnabled(true); //While paused, the player can change ink color or the time interval
                     timeSet.setEnabled(true);
                     
                     pause.setText("Resume");
                     
-                    nelly.cancel();
+                    mainTimer.cancel();
                 }
-                else
+                else //Game is paused, so unpauses
                 {
                     gamePaused = false;
                     inkColorB.setEnabled(false);
@@ -362,8 +375,8 @@ public class Bingo extends JFrame
                     
                     pause.setText("Pause");
                     
-                    nelly = new Timer();
-                    nelly.schedule(new ballClass(), 0, 1 * 1000);
+                    mainTimer = new Timer(); //Timer resumes
+                    mainTimer.schedule(new ballClass(), 0, 1 * 1000);
                 }
             }
         }
@@ -371,18 +384,18 @@ public class Bingo extends JFrame
     
     private class mouseHandlerClass implements MouseListener
     {
-        public void mouseClicked(MouseEvent ebento) 
+        public void mouseClicked(MouseEvent e) 
         {
-            //Nothing
+            //Nothing (mandatory override)
         }
 
-        public void mousePressed(MouseEvent ebento) 
+        public void mousePressed(MouseEvent e) 
         {
             for (int i = 0; i < number.length; i++)
             {
-                if (ebento.getSource() == number[i])
+                if (e.getSource() == number[i])
                 {
-                    if (checkNumber(number[i]))
+                    if (checkNumber(number[i])) //If the number has been called, ink the square
                     {
                         numberInked[i] = true;
                         switch(inkColor)
@@ -425,7 +438,7 @@ public class Bingo extends JFrame
                         }
                         
                         numberGot++;
-                        if (numberGot > 3)
+                        if (numberGot > 3) //If at least four numbers have been inked, a bingo becomes possible, so check for it
                         {
                             checkBingo();
                         }
@@ -434,19 +447,19 @@ public class Bingo extends JFrame
             }
         }
 
-        public void mouseReleased(MouseEvent ebento) 
+        public void mouseReleased(MouseEvent e) 
         {
-            //Nejthing
+            //Nothing (mandatory override)
         }
 
-        public void mouseEntered(MouseEvent ebento)
+        public void mouseEntered(MouseEvent e)
         {
-            //Shou ga nai
+            //Nothing (mandatory override)
         }
 
-        public void mouseExited(MouseEvent ebento) 
+        public void mouseExited(MouseEvent e) 
         {
-            //Netei kolina
+            //Nothing (mandatory override)
         }
         
     }
@@ -455,7 +468,7 @@ public class Bingo extends JFrame
     {
         int ballTime;
         
-        private ballClass()
+        private ballClass() //Constructor
         {
             if (! gameActive) //i.e. the game has just started
             {
@@ -468,8 +481,9 @@ public class Bingo extends JFrame
             }
         }
         
-        public void run() 
+        public void run() //1 second interval
         {                 
+            //This block dynamically sets the text depending on the time left until the next ball.
             if (ballTime < 11)
             {
                 if (ballTime == 0)
@@ -494,6 +508,7 @@ public class Bingo extends JFrame
             }
             ballTime--;
             
+            //Ball is drawn if the time has reached the end of 0
             if (ballTime < 0)
             {
                 ballTime = delay;
@@ -502,10 +517,8 @@ public class Bingo extends JFrame
         }    
     }
     
-    /**
-     * Fills the B column of the bingo card with five different numbers, ranging from 1-15.
-     * @param selection Array of card numbers
-     */
+
+    //Fills the B column of the bingo card with five different numbers, ranging from 1-15.
     public void getB (int[] selection)
     {
         for (int i = 0; i < 5; i++)
@@ -513,7 +526,7 @@ public class Bingo extends JFrame
             selection[i] = pick.nextInt(15) + 1;
         }
         
-        while (selection[1] == selection[0])
+        while (selection[1] == selection[0]) //To make sure that the numbers are not identical to one another
         {
             selection[1] = pick.nextInt(15) + 1;
         }
@@ -539,6 +552,7 @@ public class Bingo extends JFrame
         }
     }
     
+    //Same as B, but for the I numbers (16-30)
     public void getI (int[] selection)
     {
         for (int i = 5; i < 10; i++)
@@ -572,6 +586,7 @@ public class Bingo extends JFrame
         }
     }
     
+    //Etc. (31-45)
     public void getN (int[] selection)
     {
         for (int i = 10; i < 14; i++)
@@ -600,6 +615,7 @@ public class Bingo extends JFrame
         }
     }
     
+    //Etc. (46-60)
     public void getG (int[] selection)
     {
         for (int i = 14; i < 19; i++)
@@ -633,6 +649,7 @@ public class Bingo extends JFrame
         }
     }
     
+    //Etc. (61-75)
     public void getO (int[] selection)
     {
         for (int i = 19; i < 24; i++)
@@ -666,6 +683,7 @@ public class Bingo extends JFrame
         }
     }
     
+    //Draws a ball, verifies that it has not been called already, and displays it on the screen. Also lights up the number on the board.
     public void drawBall()
     {
         int ball = pick.nextInt(75) + 1;
@@ -685,6 +703,7 @@ public class Bingo extends JFrame
         displayCount.setText("" + calledNumbers.size());
     }
     
+    //Goes through the list of called numbers. If the number passed in is in the list, returns true. If not, returns false.
     public Boolean checkCalled(int drawnBall)
     {
         for(int i = 0; i < calledNumbers.size(); i++)
@@ -697,6 +716,7 @@ public class Bingo extends JFrame
         return false;
     }
     
+    //This sets the ball icon on the left side of the screen to reflect the number drawn
     public void setBallLabel(int drawnBall)
     {
         if (drawnBall < 16)
@@ -722,6 +742,8 @@ public class Bingo extends JFrame
         ballNumber.setText("" + drawnBall);
     }
     
+    //Takes the label, converts its text into a number, then sees if that number on the board is lit up.
+    //If it is lit up, returns true. If not, returns false.
     public Boolean checkNumber(JLabel nLabel)
     {
         char[] numberClicked = nLabel.getText().toCharArray();
@@ -729,7 +751,7 @@ public class Bingo extends JFrame
         int clickTens = 0, clickUnit = 0;
         int digits = numberClicked.length;
         
-        if (digits == 2)
+        if (digits == 2) //Again converting from the ASCII values
         {
             clickTens = numberClicked[0] - 48;
             clickUnit = numberClicked[1] - 48;
@@ -741,11 +763,13 @@ public class Bingo extends JFrame
         
         int clickedNumber = clickTens * 10 + clickUnit;
         
-        if (boardNumber[clickedNumber - 1].getForeground() == Color.WHITE)
+        if (boardNumber[clickedNumber - 1].getForeground() == Color.WHITE) //If the corresponding number is lit up
         {
             return true;
         }
         return false;
+        
+        //Below was a previous system that did not account for previously drawn balls
         
 //        System.out.println("" + actTens + " " + actUnit + " " + digits);
 //        for (int i = 0; i < numberClicked.length; i++)
@@ -778,6 +802,7 @@ public class Bingo extends JFrame
 //        return false;
     }
     
+    //Sees if a bingo exists, and if it does, calls for a bingo to be displayed
     public void checkBingo()
     {       
         if (numberInked[0])
@@ -887,6 +912,7 @@ public class Bingo extends JFrame
         }
     }
     
+    //Lights up the spaces passed in in gold and displays the win animation at the top of the screen
     public void displayBingo(int space1, int space2, int space3, int space4)
     {
         numberInk[space1].setIcon(inkGold);
@@ -898,6 +924,7 @@ public class Bingo extends JFrame
         reset();
     }
     
+    //Lights up the spaces passed in in gold and displays the win animation at the top of the screen
     public void displayBingo(int space1, int space2, int space3, int space4, int space5)
     {
         numberInk[space1].setIcon(inkGold);
@@ -910,15 +937,17 @@ public class Bingo extends JFrame
         reset();
     }
     
+    //Allows for a new game
     public void reset()
     {
-        nelly.cancel();
+        mainTimer.cancel();
         
         newGame.setEnabled(true);
         inkColorB.setEnabled(true);
         timeSet.setEnabled(true);
     }
     
+    //Clears the ink and numbers in preparation for a new game. Also clears the board, the ball, the top of the screen, and the number lists.
     public void clearCard()
     {
         for (int i = 0; i < numberInk.length; i++)
@@ -941,6 +970,7 @@ public class Bingo extends JFrame
         }
     }
     
+    //Unnecessary as the ink color and delay are essentially flags and so can be accessed from other classes
     public void setInkColor(int newInk)
     {
         inkColor = newInk;

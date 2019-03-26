@@ -1,3 +1,5 @@
+//This file opens a window containing the game (also has the version history).
+
 package bingo1;
 
 import javax.swing.JFrame;
@@ -6,10 +8,10 @@ public class Bingo1
 {
     public static void main(String[] args) 
     {
-        Bingo moira = new Bingo();
-        moira.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        moira.setSize(1200, 1000); //Size of the window
-        moira.setVisible(true);
+        Bingo bingo = new Bingo();
+        bingo.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        bingo.setSize(1200, 1000); //Size of the window
+        bingo.setVisible(true);
     }
 }
 
